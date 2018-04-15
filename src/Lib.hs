@@ -18,10 +18,12 @@ module Lib (
     ,   tagRename
     ,   forceTagRename
     ,   someFunc
+    ,   makeLink
 ) where
 
 import Tags
 import Finding
+import Link
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
