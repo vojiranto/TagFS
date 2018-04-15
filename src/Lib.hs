@@ -11,8 +11,8 @@
 --      - добавления/удаления тега в систему;
 --      - Добавления тега файлу;
 --      - переименования файла;
---      - переименования тега;
 --  TODO: Реструктуризация кода по модулям.
+--  TODO: Отход от плоской модели хранения файлов, тегирование директорий.
 --  TODO: Автоприсваиваемые теги: "Изображения", "Документы", "Видео"...
 --  TODO: Метаинформация: описание и примечание для файла.
 --  TODO: ГУИ.
@@ -75,6 +75,43 @@ getFileList aTag = return . union [] =<< aGetFilesList [] [] [aTag]
                 let aNewFileList = union aFiles aFileList
                     aNewForProcessing = union aTags xs \\ aNewFileList
                 aGetFilesList (x:aProcessed) aNewFileList aNewForProcessing
+
+
+-- переименовывание тега
+tagRename :: String -> String -> IO ()
+tagRename aOldName aNaweName = do
+    aTagList <- getTagList
+    if aNaweName `notElem` aTagList
+        then forceTagRenameInternal aTagList aOldName aNaweName
+        else putStrLn $  "Тег \"" ++ aNaweName ++ "\" уже существует."
+
+
+-- переименовать тег, без проверки на наличие совпадений.
+forceTagRename :: String -> String -> IO ()
+forceTagRename aOldName aNaweName = do
+    aTagList <- getTagList
+    forceTagRenameInternal aTagList aOldName aNaweName
+
+
+-- внутренняя часть переименования тега
+forceTagRenameInternal :: [String] -> String -> String -> IO ()
+forceTagRenameInternal aTagList aOldName aNaweName = do
+    aTags    <- filterM (tagIsInTag aOldName) aTagList
+    aHomeDirectory <- getHomeDirectory
+    let aPath = aHomeDirectory ++ "/.tagFS/tags/"
+    forM_ aTags $ \aTag -> do
+        removeLink $ aPath ++ aTag ++ "/" ++ aOldName
+        createSymbolicLink
+            (aPath ++ aNaweName)
+            (aPath ++ aTag ++ "/" ++ aNaweName)
+    rename (aPath ++ aOldName)  (aPath ++ aNaweName)
+    putStrLn $ "Тег \"" ++ aOldName ++ "\" переименован в \"" ++ aNaweName ++ "\"."
+
+-- проверяем, что тег А полностью входит в тег Б.
+tagIsInTag :: String -> String -> IO Bool
+tagIsInTag aTagA aTagB = do
+    (aTags, _) <- takeTagAndFilesList aTagB
+    return $ aTagA `elem` aTags
 
 
 class Finding a where
