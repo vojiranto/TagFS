@@ -34,14 +34,14 @@ instance Finding (IO [String]) where
 
         -- размещаем в ней ссылки на файлы соответствующего тега
         aPureFiles <- aFiles
-        putStrLn $ "Число найденых файлов " ++ show (length aPureFiles)
+        putStrLn $ "Число найденых объектов " ++ show (length aPureFiles)
         forM_ aPureFiles $ \aFile -> createSymbolicLink
             (aHomeDirectory ++ "/.tagFS/files/" ++ aFile)
             (aHomeDirectory ++ "/Поиск/" ++ aFile)
 
     find aFiles = do
         aPureFiles <- aFiles
-        putStrLn $ "Число найденых файлов " ++ show (length aPureFiles)
+        putStrLn $ "Число найденых объектов " ++ show (length aPureFiles)
         forM_ aPureFiles putStrLn
 
 
