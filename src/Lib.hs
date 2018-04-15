@@ -77,14 +77,14 @@ getFileList aTag = return . union [] =<< aGetFilesList [] [] [aTag]
                 aGetFilesList (x:aProcessed) aNewFileList aNewForProcessing
 
 
-class Find a where
-    toFile :: a -> IO ()
+class Finding a where
+    result :: a -> IO ()
     find   :: a -> IO ()
 
 
 -- найти все файлы из списка и поместить их в папку "Поиск"
-instance Find (IO [String]) where
-    toFile aFiles = do
+instance Finding (IO [String]) where
+    result aFiles = do
         aHomeDirectory <- getHomeDirectory
         let aFindDirectory = aHomeDirectory ++ "/Поиск"
 
@@ -106,13 +106,12 @@ instance Find (IO [String]) where
 
 
 -- найти все файлы под тегом и поместить их в папку "Поиск"
-instance Find String where
-    toFile = toFile . getFileList
-
+instance Finding String where
+    result = result . getFileList
     find = find . getFileList
 
 
--- теоретико множественные операции.
+-- теоретико множественные операции
 class TagSet a b where
     infixl 7 !*
     infixl 6 !-, !+
