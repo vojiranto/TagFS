@@ -5,6 +5,17 @@
     ,   FlexibleInstances
 #-}
 
+--  TODO: Написать редми.
+--      - Описать, какие предположения о структуре файлов делает система.
+--  TODO: Операции над файлами и тегами:
+--      - добавления/удаления тега в систему;
+--      - Добавления тега файлу;
+--      - переименования файла;
+--      - переименования тега;
+--  TODO: Реструктуризация кода по модулям.
+--  TODO: Автоприсваиваемые теги: "Изображения", "Документы", "Видео"...
+--  TODO: ГУИ.
+
 module Lib where
 
 import System.Directory
@@ -61,9 +72,6 @@ getFileList aTag = return . union [] =<< aGetFilesList [] [] [aTag]
                 let aNewFileList = union aFiles aFileList
                     aNewForProcessing = union aTags xs \\ aNewFileList
                 aGetFilesList (x:aProcessed) aNewFileList aNewForProcessing
-
-
-
 
 
 class Find a where
