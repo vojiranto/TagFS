@@ -104,6 +104,7 @@ instance Find (IO [String]) where
         putStrLn $ "Число найденых файлов " ++ show (length aPureFiles)
         forM_ aPureFiles putStrLn
 
+
 -- найти все файлы под тегом и поместить их в папку "Поиск"
 instance Find String where
     toFile = toFile . getFileList
