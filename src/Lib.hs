@@ -31,10 +31,12 @@ type Files = [String]
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
 
+
 tags :: IO ()
 tags = do
     aTags <- getTagList
     forM_ aTags putStrLn
+
 
 -- взятие списка тегов
 getTagList :: IO [String]
@@ -108,6 +110,8 @@ instance Find String where
 
     find = find . getFileList
 
+
+-- теоретико множественные операции.
 class TagSet a b where
     infixl 7 !*
     infixl 6 !-, !+
