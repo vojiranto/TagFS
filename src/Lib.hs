@@ -27,6 +27,8 @@ module Lib (
     -- * Создать индексы
     ,   makeTageIndex
     ,   makeFileIndex
+    -- * Инициация вспомогательных структур
+    ,   initFS
     ,   someFunc
 ) where
 
@@ -34,6 +36,7 @@ import Tags
 import Finding
 import Link
 import Index
+import Init
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"

@@ -13,7 +13,7 @@ import Tags
 makeTageIndex :: IO ()
 makeTageIndex = do
     aHomeDirectory <- getHomeDirectory
-    let aTagPath = aHomeDirectory ++ "/.tagFS/index/tag/"
+    let aTagPath = aHomeDirectory ++ "/.tagFS/index/tags/"
     aTags <- getTagList
     forM_ aTags $ \aTag -> do
         aFiles <- getFileList aTag
@@ -38,8 +38,8 @@ makeFileIndex = do
         return $ (aTag, aFiles)
 
     aAllFiles <- getAllFileList
-    let aTagPath = aHomeDirectory ++ "/.tagFS/index/file/"
+    let aTagPath = aHomeDirectory ++ "/.tagFS/index/files/"
     forM_ aAllFiles $ \aFile -> do
         let aIndex = [aTag | (aTag, aList) <- aTagIdex, aFile `elem` aList]
-        writeFile (aTagPath ++ aFile ++ ".txt") $ 
+        writeFile (aTagPath ++ aFile ++ ".txt") $
             concat [aTag ++ "\n" | aTag <- aIndex]
