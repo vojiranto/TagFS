@@ -13,19 +13,27 @@
 --  TODO: ГУИ.
 
 module Lib (
+    -- * Операции для поиска и вывода результатов
         Finding (..)
     ,   TagSet (..)
+    -- * Взятие данных из системы
     ,   tags
     ,   getFileList
+    -- * Создание файла-ссылки на файл в сети.
+    ,   makeLink
+    -- * Переименование тега
     ,   tagRename
     ,   forceTagRename
+    -- * Создать индексы
+    ,   makeTageIndex
+    ,   makeFileIndex
     ,   someFunc
-    ,   makeLink
 ) where
 
 import Tags
 import Finding
 import Link
+import Index
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"

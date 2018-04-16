@@ -1,6 +1,7 @@
 module Tags (
         tags
     ,   getFileList
+    ,   getTagList
     ,   tagRename
     ,   forceTagRename
 ) where

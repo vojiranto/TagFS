@@ -3,6 +3,7 @@
     ,   MultiParamTypeClasses
     ,   TypeSynonymInstances
     ,   FlexibleInstances
+    ,   InstanceSigs
 #-}
 
 module Finding (
@@ -12,46 +13,54 @@ module Finding (
 
 import System.Directory
 import System.Posix.Files
-import Data.List.Extra hiding (find)
+import Data.List.Extra
 import Control.Monad
 import Tags
 
+-- | Очищаем содержимое директории.
+clearDirectory :: String -> IO ()
+clearDirectory aDirectory = do
+    removeDirectoryRecursive aDirectory
+    createDirectory aDirectory
+
 
 class Finding a where
-    result :: a -> IO ()
-    find   :: a -> IO ()
+    writeLinks :: a -> IO ()
+    showLinks  :: a -> IO ()
 
 
--- найти все файлы из списка и поместить их в папку "Поиск"
+-- | Найти все файлы из списка и поместить их в папку "Поиск".
 instance Finding (IO [String]) where
-    result aFiles = do
-        aHomeDirectory <- getHomeDirectory
-        let aFindDirectory = aHomeDirectory ++ "/Поиск"
+    writeLinks :: IO [String] -> IO ()
+    writeLinks aFiles = do
+        aPureFiles <- aFiles
 
-        -- очищаем содержимое директории "Поиск"
-        removeDirectoryRecursive aFindDirectory
-        createDirectory aFindDirectory
+        aHomeDirectory <- getHomeDirectory
+        clearDirectory $ aHomeDirectory ++ "/Поиск"
 
         -- размещаем в ней ссылки на файлы соответствующего тега
-        aPureFiles <- aFiles
-        putStrLn $ "Число найденых объектов " ++ show (length aPureFiles)
+        putStrLn $ "Число найденых объектов " ++ show (length aPureFiles) ++ "."
         forM_ aPureFiles $ \aFile -> createSymbolicLink
             (aHomeDirectory ++ "/.tagFS/files/" ++ aFile)
             (aHomeDirectory ++ "/Поиск/" ++ aFile)
 
-    find aFiles = do
+    showLinks :: IO [String] -> IO ()
+    showLinks aFiles = do
         aPureFiles <- aFiles
         putStrLn $ "Число найденых объектов " ++ show (length aPureFiles)
         forM_ aPureFiles putStrLn
 
 
--- найти все файлы под тегом и поместить их в папку "Поиск"
+-- | Найти все файлы под тегом и поместить их в папку "Поиск".
 instance Finding String where
-    result = result . getFileList
-    find = find . getFileList
+    writeLinks :: String -> IO ()
+    writeLinks = writeLinks . getFileList
+
+    showLinks :: String -> IO ()
+    showLinks = showLinks . getFileList
 
 
--- теоретико множественные операции
+-- | Теоретико множественные операции над списками файлов получаемых по тегам.
 class TagSet a b where
     infixl 7 !*
     infixl 6 !-, !+
