@@ -40,18 +40,25 @@ takeTagAndFilesList aTag = do
     aContents <- listDirectory aTagPath
 
     -- считываем ссылку
-    aFilesAndTags <- forM aContents $ \aContent -> do
+    aFilesAndTags <- forM (filter (/= "meta") aContents) $ \aContent -> do
         let aPath = aTagPath ++ "/" ++ aContent
         return . takeEnd 2 . splitOn "/" =<< readSymbolicLink aPath
 
     -- делим ссылки на те, которые ведут к тегам и файлам
     let (aTags, aFiles) = partition (\a -> head a == "tags") aFilesAndTags
-    return (last <$> aTags, last <$> aFiles)
+    aMeta <- doesFileExist $ aHomeDirectory ++ "/.tagFS/tags/" ++ aTag ++ "/meta"
+    if aMeta then return (last <$> aTags, [])
+    else return (last <$> aTags, last <$> aFiles)
 
 
 -- извлекаем список файлов относящихся к тегу
 getFileList :: String -> IO (Tags, Files)
-getFileList aTag = aFilter =<< aGetFilesList [] [] [] [aTag]
+getFileList aTag = do
+    aHomeDirectory <- getHomeDirectory
+    aMeta <- doesFileExist $ aHomeDirectory ++ "/.tagFS/tags/" ++ aTag ++ "/meta"
+    (aTags, aFiles) <- aFilter =<< aGetFilesList [] [] [] [aTag]
+    if aMeta then return (aTags, [])
+    else return (aTags, aFiles)
   where
     aGetFilesList :: Tags -> Tags -> Files -> Tags -> IO (Tags, Files)
     aGetFilesList aProcessed aTagList aFileList aForProcessing = do
