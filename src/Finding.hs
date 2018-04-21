@@ -26,38 +26,35 @@ clearDirectory aDirectory = do
 
 class Finding a where
     writeLinks :: a -> IO ()
-    showLinks  :: a -> IO ()
 
 
 -- | Найти все файлы из списка и поместить их в папку "Поиск".
-instance Finding (IO [String]) where
-    writeLinks :: IO [String] -> IO ()
-    writeLinks aFiles = do
-        aPureFiles <- aFiles
+instance Finding (IO ([String], [String])) where
+    writeLinks :: IO ([String], [String]) -> IO ()
+    writeLinks aLists = do
+        (aTags, aFiles) <- aLists
 
         aHomeDirectory <- getHomeDirectory
         clearDirectory $ aHomeDirectory ++ "/Поиск"
 
         -- размещаем в ней ссылки на файлы соответствующего тега
-        putStrLn $ "Число найденых объектов " ++ show (length aPureFiles) ++ "."
-        forM_ aPureFiles $ \aFile -> createSymbolicLink
+        putStrLn $ "Число найденых объектов " ++ show (length aFiles) ++ "."
+        putStrLn $ "Число найденых тегов " ++ show (length aTags) ++ "."
+
+        -- создаём ссылки на файлы
+        forM_ aFiles $ \aFile -> createSymbolicLink
             (aHomeDirectory ++ "/.tagFS/files/" ++ aFile)
             (aHomeDirectory ++ "/Поиск/" ++ aFile)
 
-    showLinks :: IO [String] -> IO ()
-    showLinks aFiles = do
-        aPureFiles <- aFiles
-        putStrLn $ "Число найденых объектов " ++ show (length aPureFiles)
-        forM_ aPureFiles putStrLn
-
+        -- создаём ссылки на теги
+        forM_ aTags $ \aTag -> createSymbolicLink
+            (aHomeDirectory ++ "/.tagFS/tags/" ++ aTag)
+            (aHomeDirectory ++ "/Поиск/" ++ aTag)
 
 -- | Найти все файлы под тегом и поместить их в папку "Поиск".
 instance Finding String where
     writeLinks :: String -> IO ()
     writeLinks = writeLinks . getFileList
-
-    showLinks :: String -> IO ()
-    showLinks = showLinks . getFileList
 
 
 -- | Теоретико множественные операции над списками файлов получаемых по тегам.
@@ -65,30 +62,74 @@ class TagSet a b where
     infixl 7 !*
     infixl 6 !-, !+
 
-    (!+) :: a -> b -> IO [String]
-    (!-) :: a -> b -> IO [String]
-    (!*) :: a -> b -> IO [String]
+    (!+) :: a -> b -> IO (Tags, Files)
+    (!-) :: a -> b -> IO (Tags, Files)
+    (!*) :: a -> b -> IO (Tags, Files)
 
 
 instance TagSet String String where
-    a !+ b = union      <$> getFileList a <*> getFileList b
-    a !- b = (\\)       <$> getFileList a <*> getFileList b
-    a !* b = intersect  <$> getFileList a <*> getFileList b
+    a !+ b = do
+        (aTagsA, aFilesA) <- getFileList a
+        (aTagsB, aFilesB) <- getFileList b
+        return (union aTagsA aTagsB, union aFilesA aFilesB)
+
+    a !- b = do
+        (aTagsA, aFilesA) <- getFileList a
+        (aTagsB, aFilesB) <- getFileList b
+        return (aTagsA \\ aTagsB, aFilesA \\ aFilesB)
+
+    a !* b = do
+        (aTagsA, aFilesA) <- getFileList a
+        (aTagsB, aFilesB) <- getFileList b
+        return (intersect aTagsA aTagsB, intersect aFilesA aFilesB)
 
 
-instance TagSet (IO [String]) String where
-    a !+ b = union      <$> a <*> getFileList b
-    a !- b = (\\)       <$> a <*> getFileList b
-    a !* b = intersect  <$> a <*> getFileList b
+instance TagSet (IO (Tags, Files)) String where
+    a !+ b = do
+        (aTagsA, aFilesA) <- a
+        (aTagsB, aFilesB) <- getFileList b
+        return (union aTagsA aTagsB, union aFilesA aFilesB)
+
+    a !- b = do
+        (aTagsA, aFilesA) <- a
+        (aTagsB, aFilesB) <- getFileList b
+        return (aTagsA \\ aTagsB, aFilesA \\ aFilesB)
+
+    a !* b = do
+        (aTagsA, aFilesA) <- a
+        (aTagsB, aFilesB) <- getFileList b
+        return (intersect aTagsA aTagsB, intersect aFilesA aFilesB)
 
 
-instance TagSet String (IO [String]) where
-    a !+ b = union      <$> getFileList a <*> b
-    a !- b = (\\)       <$> getFileList a <*> b
-    a !* b = intersect  <$> getFileList a <*> b
+instance TagSet String (IO (Tags, Files)) where
+    a !+ b = do
+        (aTagsA, aFilesA) <- getFileList a
+        (aTagsB, aFilesB) <- b
+        return (union aTagsA aTagsB, union aFilesA aFilesB)
+
+    a !- b = do
+        (aTagsA, aFilesA) <- getFileList a
+        (aTagsB, aFilesB) <- b
+        return (aTagsA \\ aTagsB, aFilesA \\ aFilesB)
+
+    a !* b = do
+        (aTagsA, aFilesA) <- getFileList a
+        (aTagsB, aFilesB) <- b
+        return (intersect aTagsA aTagsB, intersect aFilesA aFilesB)
 
 
-instance TagSet (IO [String]) (IO [String]) where
-    a !+ b = union      <$> a <*> b
-    a !- b = (\\)       <$> a <*> b
-    a !* b = intersect  <$> a <*> b
+instance TagSet (IO (Tags, Files)) (IO (Tags, Files)) where
+    a !+ b = do
+        (aTagsA, aFilesA) <- a
+        (aTagsB, aFilesB) <- b
+        return (union aTagsA aTagsB, union aFilesA aFilesB)
+
+    a !- b = do
+        (aTagsA, aFilesA) <- a
+        (aTagsB, aFilesB) <- b
+        return (aTagsA \\ aTagsB, aFilesA \\ aFilesB)
+
+    a !* b = do
+        (aTagsA, aFilesA) <- a
+        (aTagsB, aFilesB) <- b
+        return (intersect aTagsA aTagsB, intersect aFilesA aFilesB)

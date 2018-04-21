@@ -16,7 +16,7 @@ makeTageIndex = do
     let aTagPath = aHomeDirectory ++ "/.tagFS/index/tags/"
     aTags <- getTagList
     forM_ aTags $ \aTag -> do
-        aFiles <- getFileList aTag
+        (_, aFiles) <- getFileList aTag
         writeFile (aTagPath ++ aTag) $ concat [aFile ++ "\n"| aFile <- aFiles]
 
 -- | Взятие списка файлов
@@ -34,7 +34,7 @@ makeFileIndex = do
 
     -- строим индекс тегов в оперативной памяти.
     aTagIdex <- forM aTags $ \aTag -> do
-        aFiles <- getFileList aTag
+        (_, aFiles) <- getFileList aTag
         return $ (aTag, aFiles)
 
     aAllFiles <- getAllFileList

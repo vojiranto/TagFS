@@ -1,9 +1,13 @@
 module Tags (
+    -- Функции
         tags
     ,   getFileList
     ,   getTagList
     ,   tagRename
     ,   forceTagRename
+    -- * Типы псевдонимы
+    ,   Tags
+    ,   Files
 ) where
 
 
@@ -46,18 +50,22 @@ takeTagAndFilesList aTag = do
 
 
 -- извлекаем список файлов относящихся к тегу
-getFileList :: String -> IO Files
-getFileList aTag = return . union [] =<< aGetFilesList [] [] [aTag]
+getFileList :: String -> IO (Tags, Files)
+getFileList aTag = aFilter =<< aGetFilesList [] [] [] [aTag]
   where
-    aGetFilesList :: [String] -> [String] -> [String] -> IO [String]
-    aGetFilesList aProcessed aFileList aForProcessing = do
+    aGetFilesList :: Tags -> Tags -> Files -> Tags -> IO (Tags, Files)
+    aGetFilesList aProcessed aTagList aFileList aForProcessing = do
         case aForProcessing of
-            []      -> return aFileList
+            []      -> return (aTagList, aFileList)
             x:xs    -> do
                 (aTags, aFiles) <- takeTagAndFilesList x
                 let aNewFileList = union aFiles aFileList
+                    aNewTagList  = union aTags aTagList
                     aNewForProcessing = union aTags xs \\ aNewFileList
-                aGetFilesList (x:aProcessed) aNewFileList aNewForProcessing
+                aGetFilesList (x:aProcessed) aNewTagList aNewFileList aNewForProcessing
+
+    aFilter :: (Tags, Files) -> IO (Tags, Files)
+    aFilter (a, b) = return (union [] a, union [] b)
 
 
 -- переименовывание тега
