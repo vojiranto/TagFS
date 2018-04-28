@@ -4,6 +4,7 @@ module Tags (
     ,   getFileList
     ,   getTagList
     ,   tagRename
+    ,   tagDelete
     ,   forceTagRename
     -- * Типы псевдонимы
     ,   Tags
@@ -82,6 +83,19 @@ tagRename aOldName aNaweName = do
     if aNaweName `notElem` aTagList
         then forceTagRenameInternal aTagList aOldName aNaweName
         else putStrLn $  "Тег \"" ++ aNaweName ++ "\" уже существует."
+
+
+-- удаление тега из системы
+tagDelete :: String -> IO ()
+tagDelete aTagName = do
+    aHomeDirectory <- getHomeDirectory
+    aTags <- getTagList
+    forM_ aTags $ \aTag -> do
+        let aTagPath = aHomeDirectory ++ "/.tagFS/tags/" ++ aTag ++ "/" ++ aTagName
+        aOk <- fileExist aTagPath
+        when aOk $ removeFile aTagPath
+    removeDirectoryRecursive $ aHomeDirectory ++ "/.tagFS/tags/" ++ aTagName
+
 
 
 -- переименовать тег, без проверки на наличие совпадений.
