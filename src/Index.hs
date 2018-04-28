@@ -2,11 +2,8 @@
 module Index where
 
 import System.Directory
-import System.Posix.Files
-import Data.List.Extra
 import Control.Monad
 import Tags
--- qualified
 
 -- | Выясняем, какие файлы  относятся к тем или иным тегам и создаём
 --   соответствующий индекс.
@@ -35,7 +32,7 @@ makeFileIndex = do
     -- строим индекс тегов в оперативной памяти.
     aTagIdex <- forM aTags $ \aTag -> do
         (_, aFiles) <- getFileList aTag
-        return $ (aTag, aFiles)
+        return (aTag, aFiles)
 
     aAllFiles <- getAllFileList
     let aTagPath = aHomeDirectory ++ "/.tagFS/index/files/"

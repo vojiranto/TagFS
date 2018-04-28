@@ -4,7 +4,7 @@
     ,   TypeSynonymInstances
     ,   FlexibleInstances
     ,   InstanceSigs
-#-}
+  #-}
 
 module Finding (
         Finding (..)
@@ -71,7 +71,7 @@ instance TagSet String String where
     a !+ b = do
         (aTagsA, aFilesA) <- getFileList a
         (aTagsB, aFilesB) <- getFileList b
-        return (union aTagsA aTagsB, union aFilesA aFilesB)
+        return (aTagsA `union` aTagsB, aFilesA `union` aFilesB)
 
     a !- b = do
         (aTagsA, aFilesA) <- getFileList a
@@ -81,14 +81,14 @@ instance TagSet String String where
     a !* b = do
         (aTagsA, aFilesA) <- getFileList a
         (aTagsB, aFilesB) <- getFileList b
-        return (intersect aTagsA aTagsB, intersect aFilesA aFilesB)
+        return (aTagsA `intersect` aTagsB, aFilesA `intersect` aFilesB)
 
 
 instance TagSet (IO (Tags, Files)) String where
     a !+ b = do
         (aTagsA, aFilesA) <- a
         (aTagsB, aFilesB) <- getFileList b
-        return (union aTagsA aTagsB, union aFilesA aFilesB)
+        return (aTagsA `union` aTagsB, aFilesA `union` aFilesB)
 
     a !- b = do
         (aTagsA, aFilesA) <- a
@@ -98,14 +98,14 @@ instance TagSet (IO (Tags, Files)) String where
     a !* b = do
         (aTagsA, aFilesA) <- a
         (aTagsB, aFilesB) <- getFileList b
-        return (intersect aTagsA aTagsB, intersect aFilesA aFilesB)
+        return (aTagsA `intersect` aTagsB, aFilesA `intersect` aFilesB)
 
 
 instance TagSet String (IO (Tags, Files)) where
     a !+ b = do
         (aTagsA, aFilesA) <- getFileList a
         (aTagsB, aFilesB) <- b
-        return (union aTagsA aTagsB, union aFilesA aFilesB)
+        return (aTagsA `union` aTagsB, aFilesA `union` aFilesB)
 
     a !- b = do
         (aTagsA, aFilesA) <- getFileList a
@@ -115,14 +115,14 @@ instance TagSet String (IO (Tags, Files)) where
     a !* b = do
         (aTagsA, aFilesA) <- getFileList a
         (aTagsB, aFilesB) <- b
-        return (intersect aTagsA aTagsB, intersect aFilesA aFilesB)
+        return (aTagsA `intersect` aTagsB, aFilesA `intersect` aFilesB)
 
 
 instance TagSet (IO (Tags, Files)) (IO (Tags, Files)) where
     a !+ b = do
         (aTagsA, aFilesA) <- a
         (aTagsB, aFilesB) <- b
-        return (union aTagsA aTagsB, union aFilesA aFilesB)
+        return (aTagsA `union` aTagsB, aFilesA `union` aFilesB)
 
     a !- b = do
         (aTagsA, aFilesA) <- a
@@ -132,4 +132,4 @@ instance TagSet (IO (Tags, Files)) (IO (Tags, Files)) where
     a !* b = do
         (aTagsA, aFilesA) <- a
         (aTagsB, aFilesB) <- b
-        return (intersect aTagsA aTagsB, intersect aFilesA aFilesB)
+        return (aTagsA `intersect` aTagsB, aFilesA `intersect` aFilesB)

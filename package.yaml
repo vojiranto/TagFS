@@ -36,6 +36,7 @@ executables:
     ghc-options:
     - -threaded
     - -rtsopts
+    - -Wall
     - -with-rtsopts=-N
     dependencies:
     - TagFS
@@ -47,6 +48,7 @@ tests:
     ghc-options:
     - -threaded
     - -rtsopts
+    - -Wall
     - -with-rtsopts=-N
     dependencies:
     - TagFS

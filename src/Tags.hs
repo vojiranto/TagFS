@@ -17,7 +17,7 @@ module Tags (
 
 import System.Directory
 import System.Posix.Files
-import Data.List.Extra hiding (find)
+import Data.List.Extra
 import Control.Monad
 
 type Tags  = [String]
@@ -46,7 +46,7 @@ takeTagAndFilesList aTag = do
     -- считываем ссылку
     aFilesAndTags <- forM (filter (/= "meta") aContents) $ \aContent -> do
         let aPath = aTagPath ++ "/" ++ aContent
-        return . takeEnd 2 . splitOn "/" =<< readSymbolicLink aPath
+        takeEnd 2 . splitOn "/" <$> readSymbolicLink aPath
 
     -- делим ссылки на те, которые ведут к тегам и файлам
     let (aTags, aFiles) = partition (\a -> head a == "tags") aFilesAndTags
@@ -65,18 +65,18 @@ getFileList aTag = do
     else return (aTags, aFiles)
   where
     aGetFilesList :: Tags -> Tags -> Files -> Tags -> IO (Tags, Files)
-    aGetFilesList aProcessed aTagList aFileList aForProcessing = do
+    aGetFilesList aProcessed aTagList aFileList aForProcessing =
         case aForProcessing of
             []      -> return (aTagList, aFileList)
             x:xs    -> do
                 (aTags, aFiles) <- takeTagAndFilesList x
-                let aNewFileList = union aFiles aFileList
-                    aNewTagList  = union aTags aTagList
+                let aNewFileList = aFiles `union` aFileList
+                    aNewTagList  = aTags  `union` aTagList
                     aNewForProcessing = union aTags xs \\ aNewFileList
                 aGetFilesList (x:aProcessed) aNewTagList aNewFileList aNewForProcessing
 
     aFilter :: (Tags, Files) -> IO (Tags, Files)
-    aFilter (a, b) = return (union [] a, union [] b)
+    aFilter (a, b) = return ([] `union` a, [] `union` b)
 
 
 -- переименовывание тега
@@ -105,7 +105,7 @@ tagAddToFile aTagName aFileName = do
         aTagPath  = aHomeDirectory ++ "/.tagFS/tags/" ++ aTagName
     aOk1 <- doesPathExist aTagPath
     aOk2 <- doesPathExist aFilePath
-    if aOk1 && aOk2 then do
+    if aOk1 && aOk2 then
         createSymbolicLink aFilePath (aTagPath ++ "/" ++ aFileName)
     else do
         unless aOk1 $ putStrLn "Тег не существует"
@@ -116,10 +116,10 @@ tagAddToTag :: String -> String -> IO ()
 tagAddToTag aMetaTagName aTagName = do
     aHomeDirectory <- getHomeDirectory
     let aTagPath      = aHomeDirectory ++ "/.tagFS/tags/" ++ aTagName
-        aMetaTagName  = aHomeDirectory ++ "/.tagFS/tags/" ++ aMetaTagName
+        aMetaTagPath  = aHomeDirectory ++ "/.tagFS/tags/" ++ aMetaTagName
     aOk1 <- doesPathExist aTagPath
-    aOk2 <- doesPathExist aMetaTagName
-    if aOk1 && aOk2 then do
+    aOk2 <- doesPathExist aMetaTagPath
+    if aOk1 && aOk2 then
         createSymbolicLink aTagPath (aMetaTagName ++ "/" ++ aTagName)
     else do
         unless aOk1 $ putStrLn "Метатег не существует"

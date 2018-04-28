@@ -2,6 +2,7 @@ module Init where
 
 import System.Directory
 
+initFS :: IO ()
 initFS = do
     aHomeDirectory <- getHomeDirectory
     createDirectory $ aHomeDirectory ++ "/.tagFS"
