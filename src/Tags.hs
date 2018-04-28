@@ -5,6 +5,9 @@ module Tags (
     ,   getTagList
     ,   tagRename
     ,   tagDelete
+    ,   tagMake
+    ,   tagAddToFile
+    ,   tagAddToTag
     ,   forceTagRename
     -- * Типы псевдонимы
     ,   Tags
@@ -83,6 +86,44 @@ tagRename aOldName aNaweName = do
     if aNaweName `notElem` aTagList
         then forceTagRenameInternal aTagList aOldName aNaweName
         else putStrLn $  "Тег \"" ++ aNaweName ++ "\" уже существует."
+
+
+-- создание тега
+tagMake :: String -> IO ()
+tagMake aTagName = do
+    aTagList <- getTagList
+    when (aTagName `notElem` aTagList) $ do
+        aHomeDirectory <- getHomeDirectory
+        createDirectory $ aHomeDirectory  ++ "/.tagFS/tags/" ++ aTagName
+
+
+-- добавление тега к файлу
+tagAddToFile :: String -> String -> IO ()
+tagAddToFile aTagName aFileName = do
+    aHomeDirectory <- getHomeDirectory
+    let aFilePath = aHomeDirectory ++ "/.tagFS/files/" ++ aFileName
+        aTagPath  = aHomeDirectory ++ "/.tagFS/tags/" ++ aTagName
+    aOk1 <- doesPathExist aTagPath
+    aOk2 <- doesPathExist aFilePath
+    if aOk1 && aOk2 then do
+        createSymbolicLink aFilePath (aTagPath ++ "/" ++ aFileName)
+    else do
+        unless aOk1 $ putStrLn "Тег не существует"
+        unless aOk2 $ putStrLn "Файл не существует"
+
+
+tagAddToTag :: String -> String -> IO ()
+tagAddToTag aMetaTagName aTagName = do
+    aHomeDirectory <- getHomeDirectory
+    let aTagPath      = aHomeDirectory ++ "/.tagFS/tags/" ++ aTagName
+        aMetaTagName  = aHomeDirectory ++ "/.tagFS/tags/" ++ aMetaTagName
+    aOk1 <- doesPathExist aTagPath
+    aOk2 <- doesPathExist aMetaTagName
+    if aOk1 && aOk2 then do
+        createSymbolicLink aTagPath (aMetaTagName ++ "/" ++ aTagName)
+    else do
+        unless aOk1 $ putStrLn "Метатег не существует"
+        unless aOk2 $ putStrLn "Тег не существует"
 
 
 -- удаление тега из системы
