@@ -6,9 +6,11 @@ module Tags (
     ,   tagRename
     ,   tagDelete
     ,   tagMake
+    ,   makeAlias
     ,   tagAddToFile
     ,   tagAddToTag
     ,   forceTagRename
+    ,   cleanTheNames
     -- * Типы псевдонимы
     ,   Tags
     ,   Files
@@ -27,6 +29,15 @@ tags :: IO ()
 tags = do
     aTags <- getTagList
     forM_ aTags putStrLn
+
+makeAlias :: String -> String -> IO ()
+makeAlias aTag aAlias = do
+    aTags <- getTagList
+    when (aAlias `notElem` aTags) $ do
+        aHomeDirectory <- getHomeDirectory
+        createSymbolicLink
+            (aHomeDirectory ++ "/.tagFS/tags/" ++ aTag)
+            (aHomeDirectory ++ "/.tagFS/tags/" ++ aAlias)
 
 
 -- взятие списка тегов
@@ -166,3 +177,21 @@ tagIsInTag :: String -> String -> IO Bool
 tagIsInTag aTagA aTagB = do
     (aTags, _) <- takeTagAndFilesList aTagB
     return $ aTagA `elem` aTags
+
+
+cleanTheNames :: IO ()
+cleanTheNames = do
+    aTags           <- getTagList
+    aHomeDirectory  <- getHomeDirectory
+    forM_ aTags $ \aTag -> do
+        let aTagPath = aHomeDirectory ++ "/.tagFS/tags/" ++ aTag
+        aFileNames <- listDirectory aTagPath
+        forM_ aFileNames $ \aFileName -> rename
+            (aTagPath ++ "/" ++ aFileName)
+            (aTagPath ++ "/" ++ toNorm aFileName)
+
+-- убираем в начале файла префикс
+toNorm :: String -> String
+toNorm aString = if take 10 aString == "Ссылка на "
+    then drop 10 aString
+    else aString

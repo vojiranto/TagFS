@@ -21,13 +21,17 @@ module Lib (
     ,   getFileList
     -- * Создание файла-ссылки на файл в сети.
     ,   makeLink
-    -- * Переименование тега
+    -- * Операции над файлами
+    ,   addFile
+    -- * Операции над тегами
     ,   tagMake
     ,   tagRename
     ,   tagDelete
     ,   tagAddToFile
     ,   tagAddToTag
     ,   forceTagRename
+    ,   makeAlias
+    ,   cleanTheNames
     -- * Создать индексы
     ,   makeTageIndex
     ,   makeFileIndex
@@ -38,6 +42,7 @@ module Lib (
 
 import Tags
 import Finding
+import File
 import Link
 import Index
 import Init

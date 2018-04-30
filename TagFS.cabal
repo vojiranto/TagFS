@@ -1,0 +1,80 @@
+-- This file has been generated from package.yaml by hpack version 0.20.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: c5ad991925f98ce2e815247a398d1e4a7365cb1aae2b3877999bec0b1fa8872d
+
+name:           TagFS
+version:        0.1.0.0
+description:    Please see the README on Github at <https://github.com/githubuser/TagFS#readme>
+homepage:       https://github.com/githubuser/TagFS#readme
+bug-reports:    https://github.com/githubuser/TagFS/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2018 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+
+extra-source-files:
+    ChangeLog.md
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/TagFS
+
+library
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , directory
+    , extra
+    , unix
+  exposed-modules:
+      File
+      Finding
+      Index
+      Init
+      Lib
+      Link
+      Tags
+  other-modules:
+      Paths_TagFS
+  default-language: Haskell2010
+
+executable TagFS-exe
+  main-is: Main.hs
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -Wall -with-rtsopts=-N
+  build-depends:
+      TagFS
+    , base >=4.7 && <5
+    , containers
+    , directory
+    , extra
+    , unix
+  other-modules:
+      Paths_TagFS
+  default-language: Haskell2010
+
+test-suite TagFS-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -Wall -with-rtsopts=-N
+  build-depends:
+      TagFS
+    , base >=4.7 && <5
+    , containers
+    , directory
+    , extra
+    , unix
+  other-modules:
+      Paths_TagFS
+  default-language: Haskell2010
