@@ -24,6 +24,7 @@ data Lexem where
 toFuncTree :: BracketTree -> FuncTree
 toFuncTree = \case
     Lexem (Tag a)   -> ListNode a
+    Lexem (NotTag a) -> error $ "Parser.toFuncTree:" ++ a ++ "is'nt a tag."
     Brakets aLexems -> aOrNot [] aLexems
   where
     aOrNot :: [BracketTree] -> [BracketTree] -> FuncTree
@@ -85,7 +86,7 @@ lexer = filter notNullLexem . map cleanLexem . aLexer ""
 -- чистим лексемы
 cleanLexem :: Lexem -> Lexem
 cleanLexem = \case
-    NotTag a    -> NotTag $ filter (/=' ') a
+    NotTag a    -> NotTag $ filter (`notElem`" \n") a
     Tag a       -> Tag a
 
 -- проверяем, что лексема не пуста
