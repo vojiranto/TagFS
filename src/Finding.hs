@@ -1,5 +1,6 @@
 {-# Language
         MultiWayIf
+    ,   LambdaCase
     ,   MultiParamTypeClasses
     ,   TypeSynonymInstances
     ,   FlexibleInstances
@@ -9,6 +10,7 @@
 module Finding (
         Finding (..)
     ,   TagSet (..)
+    ,   requestFind
 ) where
 
 import System.Directory
@@ -16,6 +18,7 @@ import System.Posix.Files
 import Data.List.Extra
 import Control.Monad
 import Tags
+import Parser
 
 -- | Очищаем содержимое директории.
 clearDirectory :: String -> IO ()
@@ -133,3 +136,14 @@ instance TagSet (IO (Tags, Files)) (IO (Tags, Files)) where
         (aTagsA, aFilesA) <- a
         (aTagsB, aFilesB) <- b
         return (aTagsA `intersect` aTagsB, aFilesA `intersect` aFilesB)
+
+-- преобразование дерева в поисковый запрос
+findTags :: FuncTree -> IO (Tags, Files)
+findTags = \case
+    ListNode a   -> getFileList a
+    AndNode  a b -> findTags a !* findTags b
+    OrNode   a b -> findTags a !+ findTags b
+    NotNode  a b -> findTags a !- findTags b
+
+requestFind :: String -> IO ()
+requestFind = writeLinks . findTags . toFuncTree . toBracketTree . lexer

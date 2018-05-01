@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c5ad991925f98ce2e815247a398d1e4a7365cb1aae2b3877999bec0b1fa8872d
+-- hash: e466aa6e4282cab4a78a87aa1739e18524e6b2b8583a0512cf9f28ad332d4258
 
 name:           TagFS
 version:        0.1.0.0
@@ -33,6 +33,7 @@ library
     , containers
     , directory
     , extra
+    , parsec
     , unix
   exposed-modules:
       File
@@ -41,6 +42,7 @@ library
       Init
       Lib
       Link
+      Parser
       Tags
   other-modules:
       Paths_TagFS
@@ -57,6 +59,7 @@ executable TagFS-exe
     , containers
     , directory
     , extra
+    , parsec
     , unix
   other-modules:
       Paths_TagFS
@@ -74,6 +77,7 @@ test-suite TagFS-test
     , containers
     , directory
     , extra
+    , parsec
     , unix
   other-modules:
       Paths_TagFS
