@@ -104,33 +104,19 @@ writeLinks aLists = do
         (aHomeDirectory ++ "/Поиск/" ++ aTag)
 
 
--- | Теоретико множественные операции над списками файлов получаемых по тегам.
-infixl 7 !*
-infixl 6 !-, !+
-
-(!+), (!-), (!*) :: IO (Tags, Files) -> IO (Tags, Files) -> IO (Tags, Files)
-a !+ b = do
-    (aTagsA, aFilesA) <- a
-    (aTagsB, aFilesB) <- b
-    return (aTagsA `union` aTagsB, aFilesA `union` aFilesB)
-
-a !- b = do
-    (aTagsA, aFilesA) <- a
-    (aTagsB, aFilesB) <- b
-    return (aTagsA \\ aTagsB, aFilesA \\ aFilesB)
-
-a !* b = do
-    (aTagsA, aFilesA) <- a
-    (aTagsB, aFilesB) <- b
-    return (aTagsA `intersect` aTagsB, aFilesA `intersect` aFilesB)
-
 -- преобразование дерева в поисковый запрос
 findTags :: FuncTree -> IO (Tags, Files)
 findTags = \case
     ListNode a   -> getFileList a
-    AndNode  a b -> findTags a !* findTags b
-    OrNode   a b -> findTags a !+ findTags b
-    NotNode  a b -> findTags a !- findTags b
+    AndNode  a b -> aOperation intersect    a b
+    OrNode   a b -> aOperation union        a b
+    NotNode  a b -> aOperation (\\)         a b
+  where
+    aOperation :: ([String] -> [String] -> [String]) -> FuncTree -> FuncTree -> IO (Tags, Files) 
+    aOperation aF a b = do
+        (aTagsA, aFilesA) <- findTags a
+        (aTagsB, aFilesB) <- findTags b
+        return (aTagsA `aF` aTagsB, aFilesA `aF` aFilesB)
 
 requestFind :: String -> IO ()
 requestFind = writeLinks . findTags . toFuncTree . toBracketTree . lexer
