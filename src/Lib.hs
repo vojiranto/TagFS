@@ -31,6 +31,7 @@ someFunc = do
     args <- getArgs
     case args of
         ["initFS"]                              -> initFS
+        ["clean"]                               -> cleanTheNames
         ["addFile", aFilePath, aFileName]       -> addFile aFilePath aFileName
         ["find", aRequest]                      -> requestFind aRequest
         ["tagMake", aName]                      -> tagMake aName
