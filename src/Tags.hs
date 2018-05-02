@@ -15,8 +15,6 @@ module Tags (
     -- * Типы псевдонимы
     ,   Tags
     ,   Files
-    ,   Finding (..)
-    ,   TagSet (..)
 ) where
 
 
@@ -83,115 +81,48 @@ clearDirectory aDirectory = do
     createDirectory aDirectory
 
 
-class Finding a where
-    writeLinks :: a -> IO ()
-
-
 -- | Найти все файлы из списка и поместить их в папку "Поиск".
-instance Finding (IO ([String], [String])) where
-    writeLinks :: IO ([String], [String]) -> IO ()
-    writeLinks aLists = do
-        (aTags, aFiles) <- aLists
+writeLinks :: IO ([String], [String]) -> IO ()
+writeLinks aLists = do
+    (aTags, aFiles) <- aLists
 
-        aHomeDirectory <- getHomeDirectory
-        clearDirectory $ aHomeDirectory ++ "/Поиск"
+    aHomeDirectory <- getHomeDirectory
+    clearDirectory $ aHomeDirectory ++ "/Поиск"
 
-        -- размещаем в ней ссылки на файлы соответствующего тега
-        putStrLn $ "Число найденых объектов " ++ show (length aFiles) ++ "."
-        putStrLn $ "Число найденых тегов " ++ show (length aTags) ++ "."
+    -- размещаем в ней ссылки на файлы соответствующего тега
+    putStrLn $ "Число найденых объектов " ++ show (length aFiles) ++ "."
+    putStrLn $ "Число найденых тегов " ++ show (length aTags) ++ "."
 
-        -- создаём ссылки на файлы
-        forM_ aFiles $ \aFile -> createSymbolicLink
-            (aHomeDirectory ++ "/.tagFS/files/" ++ aFile)
-            (aHomeDirectory ++ "/Поиск/" ++ aFile)
+    -- создаём ссылки на файлы
+    forM_ aFiles $ \aFile -> createSymbolicLink
+        (aHomeDirectory ++ "/.tagFS/files/" ++ aFile)
+        (aHomeDirectory ++ "/Поиск/" ++ aFile)
 
-        -- создаём ссылки на теги
-        forM_ aTags $ \aTag -> createSymbolicLink
-            (aHomeDirectory ++ "/.tagFS/tags/" ++ aTag)
-            (aHomeDirectory ++ "/Поиск/" ++ aTag)
-
--- | Найти все файлы под тегом и поместить их в папку "Поиск".
-instance Finding String where
-    writeLinks :: String -> IO ()
-    writeLinks = writeLinks . getFileList
+    -- создаём ссылки на теги
+    forM_ aTags $ \aTag -> createSymbolicLink
+        (aHomeDirectory ++ "/.tagFS/tags/" ++ aTag)
+        (aHomeDirectory ++ "/Поиск/" ++ aTag)
 
 
 -- | Теоретико множественные операции над списками файлов получаемых по тегам.
-class TagSet a b where
-    infixl 7 !*
-    infixl 6 !-, !+
+infixl 7 !*
+infixl 6 !-, !+
 
-    (!+) :: a -> b -> IO (Tags, Files)
-    (!-) :: a -> b -> IO (Tags, Files)
-    (!*) :: a -> b -> IO (Tags, Files)
+(!+), (!-), (!*) :: IO (Tags, Files) -> IO (Tags, Files) -> IO (Tags, Files)
+a !+ b = do
+    (aTagsA, aFilesA) <- a
+    (aTagsB, aFilesB) <- b
+    return (aTagsA `union` aTagsB, aFilesA `union` aFilesB)
 
+a !- b = do
+    (aTagsA, aFilesA) <- a
+    (aTagsB, aFilesB) <- b
+    return (aTagsA \\ aTagsB, aFilesA \\ aFilesB)
 
-instance TagSet String String where
-    a !+ b = do
-        (aTagsA, aFilesA) <- getFileList a
-        (aTagsB, aFilesB) <- getFileList b
-        return (aTagsA `union` aTagsB, aFilesA `union` aFilesB)
-
-    a !- b = do
-        (aTagsA, aFilesA) <- getFileList a
-        (aTagsB, aFilesB) <- getFileList b
-        return (aTagsA \\ aTagsB, aFilesA \\ aFilesB)
-
-    a !* b = do
-        (aTagsA, aFilesA) <- getFileList a
-        (aTagsB, aFilesB) <- getFileList b
-        return (aTagsA `intersect` aTagsB, aFilesA `intersect` aFilesB)
-
-
-instance TagSet (IO (Tags, Files)) String where
-    a !+ b = do
-        (aTagsA, aFilesA) <- a
-        (aTagsB, aFilesB) <- getFileList b
-        return (aTagsA `union` aTagsB, aFilesA `union` aFilesB)
-
-    a !- b = do
-        (aTagsA, aFilesA) <- a
-        (aTagsB, aFilesB) <- getFileList b
-        return (aTagsA \\ aTagsB, aFilesA \\ aFilesB)
-
-    a !* b = do
-        (aTagsA, aFilesA) <- a
-        (aTagsB, aFilesB) <- getFileList b
-        return (aTagsA `intersect` aTagsB, aFilesA `intersect` aFilesB)
-
-
-instance TagSet String (IO (Tags, Files)) where
-    a !+ b = do
-        (aTagsA, aFilesA) <- getFileList a
-        (aTagsB, aFilesB) <- b
-        return (aTagsA `union` aTagsB, aFilesA `union` aFilesB)
-
-    a !- b = do
-        (aTagsA, aFilesA) <- getFileList a
-        (aTagsB, aFilesB) <- b
-        return (aTagsA \\ aTagsB, aFilesA \\ aFilesB)
-
-    a !* b = do
-        (aTagsA, aFilesA) <- getFileList a
-        (aTagsB, aFilesB) <- b
-        return (aTagsA `intersect` aTagsB, aFilesA `intersect` aFilesB)
-
-
-instance TagSet (IO (Tags, Files)) (IO (Tags, Files)) where
-    a !+ b = do
-        (aTagsA, aFilesA) <- a
-        (aTagsB, aFilesB) <- b
-        return (aTagsA `union` aTagsB, aFilesA `union` aFilesB)
-
-    a !- b = do
-        (aTagsA, aFilesA) <- a
-        (aTagsB, aFilesB) <- b
-        return (aTagsA \\ aTagsB, aFilesA \\ aFilesB)
-
-    a !* b = do
-        (aTagsA, aFilesA) <- a
-        (aTagsB, aFilesB) <- b
-        return (aTagsA `intersect` aTagsB, aFilesA `intersect` aFilesB)
+a !* b = do
+    (aTagsA, aFilesA) <- a
+    (aTagsB, aFilesB) <- b
+    return (aTagsA `intersect` aTagsB, aFilesA `intersect` aFilesB)
 
 -- преобразование дерева в поисковый запрос
 findTags :: FuncTree -> IO (Tags, Files)

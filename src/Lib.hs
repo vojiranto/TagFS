@@ -16,11 +16,8 @@
 --  TODO: ГиперСтраница
 
 module Lib (
-    -- * Операции для поиска и вывода результатов
-        Finding (..)
-    ,   TagSet (..)
     -- * Взятие данных из системы
-    ,   getFileList
+        getFileList
     -- * Создание файла-ссылки на файл в сети.
     ,   makeLink
     -- * Операции над файлами
@@ -51,5 +48,8 @@ import Index
 import Init
 import Tag.Operations
 
+
 someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+someFunc = do
+    aRequest <- getLine
+    requestFind aRequest
