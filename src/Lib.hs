@@ -40,6 +40,7 @@ module Lib (
     -- * Инициация вспомогательных структур
     ,   initFS
     ,   someFunc
+    ,   substitute
     ,   requestFind
 ) where
 
@@ -49,7 +50,6 @@ import Link
 import Index
 import Init
 import Tag.Operations
-
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"

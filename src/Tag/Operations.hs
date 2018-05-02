@@ -1,3 +1,4 @@
+{-#Language MultiWayIf#-}
 module Tag.Operations (
         makeAlias
     ,   tagMake
@@ -8,9 +9,11 @@ module Tag.Operations (
     ,   cleanTheNames
     ,   forceTagRename
     ,   tagRename
+    ,   substitute
   ) where
 
 import Tags
+import System.IO
 import System.Directory
 import System.Posix.Files
 import Control.Monad
@@ -44,6 +47,15 @@ tagRename aOldName aNaweName = do
         else putStrLn $  "Тег \"" ++ aNaweName ++ "\" уже существует."
 
 
+-- заменить все вхождения xs в ys.
+substitute :: String -> String -> String -> String
+substitute a b y = if
+    | length a > length y       -> y
+    | take (length a) y == a    -> b ++ substitute a b (drop (length a) y)
+    | x:xs <- y                 -> x:substitute a b xs
+    | otherwise                 -> []
+
+
 -- переименовать тег, без проверки на наличие совпадений.
 forceTagRename :: String -> String -> IO ()
 forceTagRename aOldName aNaweName = do
@@ -57,14 +69,24 @@ forceTagRenameInternal aTagList aOldName aNaweName = do
     aTags    <- filterM (tagIsInTag aOldName) aTagList
     aHomeDirectory <- getHomeDirectory
     let aPath = aHomeDirectory ++ "/.tagFS/tags/"
+
     forM_ aTags $ \aTag -> do
         removeLink $ aPath ++ aTag ++ "/" ++ aOldName
         createSymbolicLink
             (aPath ++ aNaweName)
             (aPath ++ aTag ++ "/" ++ aNaweName)
+    aFormTags <- filterM  (\a -> doesFileExist $ aPath ++ a) aTagList
+    forM_ aFormTags $ \aTag -> modifyFile
+        (aPath ++ aTag) (aSubstitute aOldName aNaweName)
     rename (aPath ++ aOldName)  (aPath ++ aNaweName)
     putStrLn $ "Тег \"" ++ aOldName ++ "\" переименован в \"" ++ aNaweName ++ "\"."
+  where
+    aSubstitute a b = substitute ('"':a ++ "\"" ) ('"':b ++ "\"" )
 
+modifyFile :: String -> (String -> String) -> IO ()
+modifyFile aPath aF = do
+    aFileString <- withFile aPath ReadMode hGetLine
+    writeFile aPath (aF aFileString)
 
 -- взятие списка тегов
 getTagList :: IO [String]
