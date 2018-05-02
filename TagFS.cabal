@@ -2,10 +2,10 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 53e40034785ddc90dd24509cc47fa40d5a1f4d3e488f186d591e43f205fcb534
+-- hash: 7c4a66d9cb56fb36e58fd5a5fbec32b8106043b3a9f93ce0a1ca21c160fcc389
 
 name:           TagFS
-version:        0.1.0.0
+version:        0.2.0.0
 description:    Please see the README on Github at <https://github.com/githubuser/TagFS#readme>
 homepage:       https://github.com/githubuser/TagFS#readme
 bug-reports:    https://github.com/githubuser/TagFS/issues
@@ -47,7 +47,7 @@ library
       Paths_TagFS
   default-language: Haskell2010
 
-executable TagFS-exe
+executable tfs
   main-is: Main.hs
   hs-source-dirs:
       app
