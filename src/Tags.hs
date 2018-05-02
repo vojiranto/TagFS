@@ -85,24 +85,21 @@ clearDirectory aDirectory = do
 writeLinks :: IO ([String], [String]) -> IO ()
 writeLinks aLists = do
     (aTags, aFiles) <- aLists
-
     aHomeDirectory <- getHomeDirectory
     clearDirectory $ aHomeDirectory ++ "/Поиск"
 
-    -- размещаем в ней ссылки на файлы соответствующего тега
-    putStrLn $ "Число найденых объектов " ++ show (length aFiles) ++ "."
-    putStrLn $ "Число найденых тегов " ++ show (length aTags) ++ "."
+    putStrLn $ "Количество объектов = " ++ show (length $ aTags ++ aFiles)
 
     -- создаём ссылки на файлы
-    forM_ aFiles $ \aFile -> createSymbolicLink
-        (aHomeDirectory ++ "/.tagFS/files/" ++ aFile)
-        (aHomeDirectory ++ "/Поиск/" ++ aFile)
-
-    -- создаём ссылки на теги
-    forM_ aTags $ \aTag -> createSymbolicLink
-        (aHomeDirectory ++ "/.tagFS/tags/" ++ aTag)
-        (aHomeDirectory ++ "/Поиск/" ++ aTag)
-
+    aMakeLinks "files" aFiles
+    aMakeLinks "tags"  aTags
+  where
+    aMakeLinks :: String -> [String] -> IO ()
+    aMakeLinks aStr aTags = forM_ aTags $ \aTag -> do
+        aHomeDirectory <- getHomeDirectory
+        createSymbolicLink
+            (aHomeDirectory ++ "/.tagFS/"++ aStr ++ "/" ++ aTag)
+            (aHomeDirectory ++ "/Поиск/" ++ aTag)
 
 -- преобразование дерева в поисковый запрос
 findTags :: FuncTree -> IO (Tags, Files)
@@ -112,11 +109,12 @@ findTags = \case
     OrNode   a b -> aOperation union        a b
     NotNode  a b -> aOperation (\\)         a b
   where
-    aOperation :: ([String] -> [String] -> [String]) -> FuncTree -> FuncTree -> IO (Tags, Files) 
+    aOperation :: ([String] -> [String] -> [String]) -> FuncTree -> FuncTree -> IO (Tags, Files)
     aOperation aF a b = do
         (aTagsA, aFilesA) <- findTags a
         (aTagsB, aFilesB) <- findTags b
         return (aTagsA `aF` aTagsB, aFilesA `aF` aFilesB)
+
 
 requestFind :: String -> IO ()
 requestFind = writeLinks . findTags . toFuncTree . toBracketTree . lexer
