@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 99291f1a972d46ffc7502cc19143d8f595ce7ef533c28c1e693d907ee44f3450
+-- hash: 53e40034785ddc90dd24509cc47fa40d5a1f4d3e488f186d591e43f205fcb534
 
 name:           TagFS
 version:        0.1.0.0
@@ -41,6 +41,7 @@ library
       Lib
       Link
       Parser
+      Tag.Operations
       Tags
   other-modules:
       Paths_TagFS

@@ -4,6 +4,7 @@ module Index where
 import System.Directory
 import Control.Monad
 import Tags
+import Tag.Operations
 
 -- | Выясняем, какие файлы  относятся к тем или иным тегам и создаём
 --   соответствующий индекс.

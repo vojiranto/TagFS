@@ -20,7 +20,6 @@ module Lib (
         Finding (..)
     ,   TagSet (..)
     -- * Взятие данных из системы
-    ,   tags
     ,   getFileList
     -- * Создание файла-ссылки на файл в сети.
     ,   makeLink
@@ -49,6 +48,7 @@ import File
 import Link
 import Index
 import Init
+import Tag.Operations
 
 
 someFunc :: IO ()
