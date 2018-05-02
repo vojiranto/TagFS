@@ -5,7 +5,7 @@
 Формат команд:
 ```
 tfs initFS
-tfs addFile aFilePath aFileName
+tfs addFile 'aFilePath' 'aFileName'
 tfs find '"tag1"+ ("tag2" - "tag3")*"tag4"'
 tfs tagMake 'aName'
 tfs tagRename 'aOldName' 'aNewName'
