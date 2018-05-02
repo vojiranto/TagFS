@@ -71,7 +71,7 @@ lexer = filter notNullLexem . map cleanLexem . aLexer ""
     aLexer :: String -> String -> [Lexem]
     aLexer aLex = \case
         x:xs
-            | x == '\''         -> NotTag (reverse aLex) : aTagLexer "" xs
+            | x == '"'         -> NotTag (reverse aLex) : aTagLexer "" xs
             | x`elem`"()+-*"    -> NotTag (reverse aLex) : NotTag [x] : aLexer "" xs
             | otherwise         -> aLexer (x:aLex) xs
         _                       -> [NotTag $ reverse aLex]
@@ -79,7 +79,7 @@ lexer = filter notNullLexem . map cleanLexem . aLexer ""
     -- Разбирае теги
     aTagLexer aLex = \case
         x:xs
-            | x /= '\'' -> aTagLexer (x:aLex) xs
+            | x /= '"' -> aTagLexer (x:aLex) xs
             | otherwise -> Tag (reverse aLex) : aLexer "" xs
         _               -> error "Parser.lexer.aTagLexer"
 
