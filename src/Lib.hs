@@ -15,31 +15,7 @@
 --  TODO: ГУЙ.
 --  TODO: ГиперСтраница
 
-module Lib (
-    -- * Взятие данных из системы
-        getFileList
-    -- * Создание файла-ссылки на файл в сети.
-    ,   makeLink
-    -- * Операции над файлами
-    ,   addFile
-    -- * Операции над тегами
-    ,   tagMake
-    ,   tagRename
-    ,   tagDelete
-    ,   tagAddToFile
-    ,   tagAddToTag
-    ,   forceTagRename
-    ,   makeAlias
-    ,   cleanTheNames
-    -- * Создать индексы
-    ,   makeTageIndex
-    ,   makeFileIndex
-    -- * Инициация вспомогательных структур
-    ,   initFS
-    ,   someFunc
-    ,   substitute
-    ,   requestFind
-) where
+module Lib (someFunc) where
 
 import Tags
 import File
@@ -47,9 +23,21 @@ import Link
 import Index
 import Init
 import Tag.Operations
+import System.Environment
 
 
 someFunc :: IO ()
 someFunc = do
-    aRequest <- getLine
-    requestFind aRequest
+    args <- getArgs
+    case args of
+        ["initFS"]                              -> initFS
+        ["addFile", aFilePath, aFileName]       -> addFile aFilePath aFileName
+        ["find", aRequest]                      -> requestFind aRequest
+        ["tagMake", aName]                      -> tagMake aName
+        ["tagRename", aOldName, aNewName]       -> tagRename aOldName aNewName
+        ["tagDelete", aName]                    -> tagDelete aName
+        ["tagAddToFile", aTagName, aFileName]   -> tagAddToFile aTagName aFileName
+        ["tagAddToTag", aMetaTagName, aTagName] -> tagAddToTag aMetaTagName aTagName
+        ["makeAlias", aName, aAlias]            -> makeAlias aName aAlias
+        ["makeLink", aName, aLink]              -> makeLink aName aLink
+        _                                       -> return ()

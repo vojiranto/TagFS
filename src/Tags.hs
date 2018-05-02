@@ -88,8 +88,6 @@ writeLinks aLists = do
     aHomeDirectory <- getHomeDirectory
     clearDirectory $ aHomeDirectory ++ "/Поиск"
 
-    putStrLn $ "Количество объектов = " ++ show (length $ aTags ++ aFiles)
-
     -- создаём ссылки на файлы
     aMakeLinks "files" aFiles
     aMakeLinks "tags"  aTags
