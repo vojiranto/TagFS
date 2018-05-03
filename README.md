@@ -4,14 +4,14 @@
 
 Формат команд:
 ```
-tfs initFS
-tfs addFile 'aFilePath' 'aFileName'
-tfs find '"tag1"+ ("tag2" - "tag3")*"tag4"'
-tfs tagMake 'aName'
-tfs tagRename 'aOldName' 'aNewName'
-tfs tagDelete 'aName'
-tfs tagAddToFile 'aTagName' 'aFileName'
-tfs tagAddToTag 'aMetaTagName' 'aTagName'
-tfs makeAlias 'aName' 'aAlias'
-tfs makeLink 'aName' 'aLink'
+tfs init
+tfs add  'aFilePath' 'aFileName'
+tfs s  '"tag1"+ ("tag2" - "tag3")*"tag4"'
+tfs mk aName
+tfs rn aoldname anewname
+tfs rm aAName
+tfs tag TagName FileNma
+tfs tagm metatag tagname
+tfs alias aname alias
+tfs ln name link
 ```

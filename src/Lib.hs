@@ -20,7 +20,6 @@ module Lib (someFunc) where
 import Tags
 import File
 import Link
-import Index
 import Init
 import Tag.Operations
 import System.Environment
@@ -30,15 +29,44 @@ someFunc :: IO ()
 someFunc = do
     args <- getArgs
     case args of
-        ["initFS"]                              -> initFS
-        ["clean"]                               -> cleanTheNames
-        ["addFile", aFilePath, aFileName]       -> addFile aFilePath aFileName
-        ["find", aRequest]                      -> requestFind aRequest
-        ["tagMake", aName]                      -> tagMake aName
-        ["tagRename", aOldName, aNewName]       -> tagRename aOldName aNewName
-        ["tagDelete", aName]                    -> tagDelete aName
-        ["tagAddToFile", aTagName, aFileName]   -> tagAddToFile aTagName aFileName
-        ["tagAddToTag", aMetaTagName, aTagName] -> tagAddToTag aMetaTagName aTagName
-        ["makeAlias", aName, aAlias]            -> makeAlias aName aAlias
-        ["makeLink", aName, aLink]              -> makeLink aName aLink
+        ["init"] -> do
+            putStrLn "Создание базовая структуры системы."
+            initFS
+        ["clean"] -> do
+            putStrLn "Чистка имён ссылок."
+            cleanTheNames
+        ["add", aFilePath, aFileName] -> do
+            putStrLn "Добавление файла в систему"
+            addFile aFilePath aFileName
+        ["s", aRequest] -> do
+            putStrLn $ "Выполнение поискового запроса " ++ aRequest
+            requestFind aRequest
+
+        ["mk", aName] -> do
+            putStrLn $ "Создание тега " ++ aName
+            tagMake aName
+
+        ["rn", aOldName, aNewName] -> do
+            putStrLn $ "Переименование тега " ++ aOldName ++ " в " ++ aNewName
+            tagRename aOldName aNewName
+
+        ["rm", aName] -> do
+            putStrLn $ "Удаление тега " ++ aName
+            tagDelete aName
+
+        ["tag", aTagName, aFileName] -> do
+            putStrLn $ "Добавление тега " ++ aTagName ++ " к файлу " ++ aFileName
+            tagAddToFile aTagName aFileName
+
+        ["tagm", aMetaTag, aTagName] -> do
+            putStrLn $ "Добавление метатега " ++ aMetaTag ++ " к тегу " ++ aTagName
+            tagAddToTag aMetaTag aTagName
+
+        ["alias", aName, aAlias] -> do
+            putStrLn "Создан псевдоним для тега."
+            makeAlias aName aAlias
+
+        ["ln", aName, aLink] -> do
+            putStrLn "Создан файл ссылка."
+            makeLink aName aLink
         _                                       -> return ()
