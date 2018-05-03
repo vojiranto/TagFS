@@ -1,5 +1,5 @@
 {-# LANGUAGE GADTs, LambdaCase #-}
-module Parser (lexer, toBracketTree, toFuncTree, FuncTree(..)) where
+module Parser (lexer, toBracketTree, toFuncTree, FuncTree(..), Lexem(..)) where
 
 
 data FuncTree where

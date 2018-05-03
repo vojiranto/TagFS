@@ -2,10 +2,10 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7c4a66d9cb56fb36e58fd5a5fbec32b8106043b3a9f93ce0a1ca21c160fcc389
+-- hash: a028b351c9829d08516c0a7cf1134503bd5d780c31345fcd7b087b0ecc86fe4f
 
 name:           TagFS
-version:        0.2.0.0
+version:        0.2.1.0
 description:    Please see the README on Github at <https://github.com/githubuser/TagFS#readme>
 homepage:       https://github.com/githubuser/TagFS#readme
 bug-reports:    https://github.com/githubuser/TagFS/issues

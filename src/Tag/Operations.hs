@@ -10,6 +10,7 @@ module Tag.Operations (
     ,   forceTagRename
     ,   tagRename
     ,   substitute
+    ,   makeFormTag
   ) where
 
 import Tags
@@ -17,7 +18,9 @@ import System.IO
 import System.Directory
 import System.Posix.Files
 import Control.Monad
-
+import Data.Graph
+import Data.List
+import Parser
 
 makeAlias :: String -> String -> IO ()
 makeAlias aTag aAlias = do
@@ -95,6 +98,18 @@ getTagList = do
     listDirectory $ aHomeDirectory ++ "/.tagFS/tags"
 
 
+checkOfCycle :: String -> [String] -> IO [String]
+checkOfCycle aMetaTag aTags = do
+    aHomeDirectory <- getHomeDirectory
+    aTagList <- getTagList
+    aGraph   <- forM aTagList $ \aTag -> do
+        aKeys <- listDirectory $ aHomeDirectory ++ "/.tagFS/tags/" ++ aTag
+        return (aTag, aTag, aKeys)
+    return $ concat $ do
+         CyclicSCC a <- stronglyConnComp $ (aMetaTag, aMetaTag, aTags):aGraph
+         return a
+
+
 -- удаление тега из системы
 tagDelete :: String -> IO ()
 tagDelete aTagName = do
@@ -102,9 +117,15 @@ tagDelete aTagName = do
     aTags <- getTagList
     forM_ aTags $ \aTag -> do
         let aTagPath = aHomeDirectory ++ "/.tagFS/tags/" ++ aTag ++ "/" ++ aTagName
-        aOk <- fileExist aTagPath
-        when aOk $ removeFile aTagPath
-    removeDirectoryRecursive $ aHomeDirectory ++ "/.tagFS/tags/" ++ aTagName
+        aOk1 <- doesFileExist $ aHomeDirectory ++ "/.tagFS/tags/" ++ aTag
+        unless aOk1 $ do
+            aOk2 <- fileExist aTagPath
+            when aOk2 $ removeFile aTagPath
+    let aTagPath = aHomeDirectory ++ "/.tagFS/tags/" ++ aTagName
+    isFile      <- doesFileExist      aTagPath
+    isDirectory <- doesDirectoryExist aTagPath
+    when isDirectory $ removeDirectoryRecursive aTagPath
+    when isFile      $ removeLink aTagPath
 
 
 cleanTheNames :: IO ()
@@ -135,7 +156,7 @@ toNorm aString = if take 10 aString == "Ссылка на "
 
 
 -- добавление тега к файлу
-tagAddToFile :: String -> String -> IO ()
+tagAddToFile :: String -> String -> IO()
 tagAddToFile aTagName aFileName = do
     aHomeDirectory <- getHomeDirectory
     let aFilePath = aHomeDirectory ++ "/.tagFS/files/" ++ aFileName
@@ -149,15 +170,30 @@ tagAddToFile aTagName aFileName = do
         unless aOk2 $ putStrLn "Файл не существует"
 
 
-tagAddToTag :: String -> String -> IO ()
+makeFormTag :: String -> String -> IO()
+makeFormTag aName aForm = do
+    aHomeDirectory <- getHomeDirectory
+    aOk1 <- checkOfCycle aName [aTags |Tag aTags <- lexer aForm]
+    let aTagPath = aHomeDirectory ++ "/.tagFS/tags/" ++ aName
+    aOk2 <- doesPathExist aTagPath
+    aOk3 <- doesFileExist aTagPath
+    when ((aOk3 || not aOk2) && null aOk1) $ do
+        putStrLn "Тег создан."
+        writeFile aTagPath aForm
+    unless (null aOk1) $ putStrLn $ "Образуют цикл: " ++ intercalate ", " aOk1
+
+tagAddToTag :: String -> String -> IO()
 tagAddToTag aMetaTagName aTagName = do
     aHomeDirectory <- getHomeDirectory
     let aTagPath      = aHomeDirectory ++ "/.tagFS/tags/" ++ aTagName
         aMetaTagPath  = aHomeDirectory ++ "/.tagFS/tags/" ++ aMetaTagName
     aOk1 <- doesPathExist aTagPath
     aOk2 <- doesPathExist aMetaTagPath
-    if aOk1 && aOk2 then
+    aOk3 <- checkOfCycle aMetaTagName [aTagName]
+    if aOk1 && aOk2 && null aOk3 then
         createSymbolicLink aTagPath (aMetaTagPath ++ "/" ++ aTagName)
     else do
+        putStrLn "Невозможно добавление метатега: "
         unless aOk1 $ putStrLn "Метатег не существует"
         unless aOk2 $ putStrLn "Тег не существует"
+        unless (null aOk3) $ putStrLn $ "Образуют цикл: " ++ intercalate ", " aOk3
