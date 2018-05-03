@@ -157,7 +157,7 @@ tagAddToTag aMetaTagName aTagName = do
     aOk1 <- doesPathExist aTagPath
     aOk2 <- doesPathExist aMetaTagPath
     if aOk1 && aOk2 then
-        createSymbolicLink aTagPath (aMetaTagName ++ "/" ++ aTagName)
+        createSymbolicLink aTagPath (aMetaTagPath ++ "/" ++ aTagName)
     else do
         unless aOk1 $ putStrLn "Метатег не существует"
         unless aOk2 $ putStrLn "Тег не существует"
