@@ -19,13 +19,13 @@
 
 module Lib (someFunc) where
 
-import Tags
-import File
-import Link
-import Init
-import Tag.Operations
-import System.Environment
-
+import  Tags
+import  File
+import  Link
+import  Init
+import  Tag.Operations
+import  System.Environment
+import  Control.Monad
 
 someFunc :: IO ()
 someFunc = do
@@ -59,13 +59,13 @@ someFunc = do
             putStrLn $ "Удаление тега " ++ aName
             tagDelete aName
 
-        ["tag", aTagName, aFileName] -> do
-            putStrLn $ "Добавление тега " ++ aTagName ++ " к файлу " ++ aFileName
-            tagAddToFile aTagName aFileName
+        "tag":aFileName:aTagNames -> do
+            putStrLn $ "Добавление тегов к файлу " ++ aFileName
+            forM_ aTagNames $ \aTagName -> tagAddToFile aTagName aFileName
 
-        ["tagm", aMetaTag, aTagName] -> do
-            putStrLn $ "Добавление метатега " ++ aMetaTag ++ " к тегу " ++ aTagName
-            tagAddToTag aMetaTag aTagName
+        "tagm":aTagName:aMetaTags -> do
+            putStrLn $ "Добавление метатегов к тегу " ++ aTagName
+            forM_ aMetaTags $ \aMetaTag -> tagAddToTag aTagName aMetaTag
 
         ["alias", aName, aAlias] -> do
             putStrLn "Создан псевдоним для тега."

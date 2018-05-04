@@ -166,7 +166,7 @@ tagAddToFile aTagName aFileName = do
     if aOk1 && aOk2 then
         createSymbolicLink aFilePath (aTagPath ++ "/" ++ aFileName)
     else do
-        unless aOk1 $ putStrLn "Тег не существует"
+        unless aOk1 $ putStrLn $ "Тег " ++ aTagName ++ " не существует"
         unless aOk2 $ putStrLn "Файл не существует"
 
 
@@ -194,6 +194,6 @@ tagAddToTag aMetaTagName aTagName = do
         createSymbolicLink aTagPath (aMetaTagPath ++ "/" ++ aTagName)
     else do
         putStrLn "Невозможно добавление метатега: "
-        unless aOk1 $ putStrLn "Метатег не существует"
+        unless aOk1 $ putStrLn $ "Метатег " ++ aMetaTagName ++ " не существует"
         unless aOk2 $ putStrLn "Тег не существует"
         unless (null aOk3) $ putStrLn $ "Образуют цикл: " ++ intercalate ", " aOk3
