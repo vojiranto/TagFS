@@ -23,6 +23,7 @@ import  Tags
 import  File
 import  Link
 import  Init
+import  Data.List
 import  Tag.Operations
 import  System.Environment
 import  Control.Monad
@@ -40,9 +41,15 @@ someFunc = do
         ["add", aFilePath, aFileName] -> do
             putStrLn "Добавление файла в систему"
             addFile aFilePath aFileName
-        ["s", aRequest] -> do
+        ["f", aRequest] -> do
             putStrLn $ "Выполнение поискового запроса " ++ aRequest
             requestFind aRequest
+
+        "s":aRequest -> do
+            let aForm   = intercalate "*" $ toTag <$> aRequest
+                toTag a = "\"" ++ a ++"\""
+            putStrLn $ "Выполнение поискового запроса " ++ aForm
+            requestFind aForm
 
         ["mk", aName] -> do
             putStrLn $ "Создание тега " ++ aName

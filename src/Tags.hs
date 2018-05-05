@@ -34,21 +34,25 @@ takeTagAndFilesList aTag = do
     aHomeDirectory <- getHomeDirectory
     let aTagPath = aHomeDirectory ++ "/.tagFS/tags/" ++ aTag
     isADirectory <- doesDirectoryExist aTagPath
-    if isADirectory then do
-        aContents <- listDirectory aTagPath
+    aExist <- doesPathExist aTagPath
+    if aExist then if isADirectory
+        then do
+            aContents <- listDirectory aTagPath
 
-        -- считываем ссылку
-        aFilesAndTags <- forM (filter (/= "meta") aContents) $ \aContent -> do
-            let aPath = aTagPath ++ "/" ++ aContent
-            takeEnd 2 . splitOn "/" <$> readSymbolicLink aPath
+            -- считываем ссылку
+            aFilesAndTags <- forM (filter (/= "meta") aContents) $ \aContent -> do
+                let aPath = aTagPath ++ "/" ++ aContent
+                takeEnd 2 . splitOn "/" <$> readSymbolicLink aPath
 
-        -- делим ссылки на те, которые ведут к тегам и файлам
-        let (aTags, aFiles) = partition (\a -> head a == "tags") aFilesAndTags
-        aMeta <- doesFileExist $ aHomeDirectory ++ "/.tagFS/tags/" ++ aTag ++ "/meta"
-        if aMeta then return (last <$> aTags, [])
-        else return (last <$> aTags, last <$> aFiles)
-    else findTags =<< toFuncTree . toBracketTree . lexer <$> readFile aTagPath
-
+            -- делим ссылки на те, которые ведут к тегам и файлам
+            let (aTags, aFiles) = partition (\a -> head a == "tags") aFilesAndTags
+            aMeta <- doesFileExist $ aHomeDirectory ++ "/.tagFS/tags/" ++ aTag ++ "/meta"
+            if aMeta then return (last <$> aTags, [])
+            else return (last <$> aTags, last <$> aFiles)
+        else findTags =<< toFuncTree . toBracketTree . lexer <$> readFile aTagPath
+    else do
+        putStrLn $ "Тег " ++ aTag ++ " не существует."
+        return ([],[])
 
 -- извлекаем список файлов относящихся к тегу
 getFileList :: String -> IO (Tags, Files)
