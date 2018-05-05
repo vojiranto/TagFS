@@ -74,9 +74,9 @@ someFunc = do
             putStrLn $ "Добавление метатегов к тегу " ++ aTagName
             forM_ aMetaTags $ \aMetaTag -> tagAddToTag aTagName aMetaTag
 
-        ["alias", aName, aAlias] -> do
-            putStrLn "Создан псевдоним для тега."
-            makeAlias aName aAlias
+        "alias":aName:aAliases -> do
+            putStrLn "Создание псевдонимов для тега."
+            forM_ aAliases $ makeAlias aName
 
         ["ln", aName, aLink] -> do
             putStrLn "Создан файл ссылка."
