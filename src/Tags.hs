@@ -58,10 +58,14 @@ takeTagAndFilesList aTag = do
 getFileList :: String -> IO (Tags, Files)
 getFileList aTag = do
     aHomeDirectory <- getHomeDirectory
-    aMeta <- doesFileExist $ aHomeDirectory ++ "/.tagFS/tags/" ++ aTag ++ "/meta"
-    (aTags, aFiles) <- aFilter =<< aGetFilesList [] [] [] [aTag]
-    if aMeta then return (aTags, [])
-    else return (aTags, aFiles)
+    if aTag /= "" then do
+        aMeta <- doesFileExist $ aHomeDirectory ++ "/.tagFS/tags/" ++ aTag ++ "/meta"
+        (aTags, aFiles) <- aFilter =<< aGetFilesList [] [] [] [aTag]
+        if aMeta then return (aTags, [])
+        else return (aTags, aFiles)
+    else do
+        aFiles <- getFileListOfEmptyTag
+        return ([], aFiles)
   where
     aGetFilesList :: Tags -> Tags -> Files -> Tags -> IO (Tags, Files)
     aGetFilesList aProcessed aTagList aFileList aForProcessing =
@@ -76,6 +80,18 @@ getFileList aTag = do
 
     aFilter :: (Tags, Files) -> IO (Tags, Files)
     aFilter (a, b) = return ([] `union` a, [] `union` b)
+
+
+getFileListOfEmptyTag :: IO Files
+getFileListOfEmptyTag = do
+    aHomeDirectory <- getHomeDirectory
+    aFiles     <- listDirectory $ aHomeDirectory ++ "/.tagFS/files"
+    aTags      <- listDirectory $ aHomeDirectory ++ "/.tagFS/tags"
+    aFileLists <- forM aTags $ \aTag -> do
+        let aTagPath = aHomeDirectory ++ "/.tagFS/tags/" ++ aTag
+        aOk <- doesDirectoryExist aTagPath
+        if aOk then listDirectory aTagPath else return []
+    return $ aFiles \\ foldl union [] aFileLists
 
 
 -- | Очищаем содержимое директории.
