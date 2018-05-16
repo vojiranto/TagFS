@@ -25,12 +25,12 @@ toFuncTree :: BracketTree -> FuncTree
 toFuncTree = \case
     Lexem (Tag a)   -> ListNode a
     Lexem (NotTag a) -> error $ "Parser.toFuncTree:" ++ a ++ "is'nt a tag."
-    Brakets aLexems -> aOrNot [] aLexems
+    Brakets aLexems  -> aOrNot [] (reverse aLexems)
   where
     aOrNot :: [BracketTree] -> [BracketTree] -> FuncTree
     aOrNot aLexems = \case
         Lexem (NotTag "+") : xs -> OrNode  (aAnd $ reverse aLexems) (aOrNot [] xs)
-        Lexem (NotTag "-") : xs -> NotNode (aAnd $ reverse aLexems) (aOrNot [] xs)
+        Lexem (NotTag "-") : xs -> NotNode (aOrNot [] xs) (aAnd $ reverse aLexems)
         x:xs                    -> aOrNot (x:aLexems) xs
         _                       -> aAnd $ reverse aLexems
 
@@ -48,6 +48,7 @@ toFuncTree = \case
         Lexem (Tag x)       -> ListNode x
         Lexem (NotTag x)    -> error $
             "Parser.toFuncTree.aBracketToFunc: " ++ x ++ "is'nt a tag."
+
 
 
 -- разбираем скобочную структуру
